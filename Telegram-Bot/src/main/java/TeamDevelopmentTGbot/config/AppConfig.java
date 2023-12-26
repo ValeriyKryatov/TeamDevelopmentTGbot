@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class AppConfig {
 
     @Bean
-    public TelegramBot bot(@Value("1998670603:AAGzZXgOxE8UIMLOyisEk7aAqA0yq6holM4") String token) {
+    public TelegramBot bot(@Value("6509591052:AAHIqbYoFF_TRAZrevQgl_nsqQyh7nmfPbI") String token) {
         TelegramBot bot = new TelegramBot(token);
         bot.execute(new DeleteMyCommands());
         return bot;
