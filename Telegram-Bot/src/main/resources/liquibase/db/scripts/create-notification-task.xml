@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+<changeSet id="create-notification-task-table.1" author="Alexander Kharitonov">
+<!--    проверка на создание таблицы, есть она или нет в базе данных -->
+    <preConditions>
+        <not>
+            <tableExists tableName="notification_task"/>
+        </not>
+    </preConditions>
+<!--    если таблица такая не существует, то выполняется скрипт ниже-->
+    <createTable tableName="notification_task">
+        <!--    <createTable tableName="notification_task"> создаем название таблицы   -->
+           <!-- далее, создаем колонку "id" таблицы  -->
+        <column name="id" autoIncrement="true" type="BIGINT">
+               <constraints primaryKey="true"/>
+        </column>
+           <!-- далее, создаем следующую колонку таблицы nullable="false" - уникальный текст -->
+        <column name="text"  type="VARCHAR(4096)">
+            <constraints primaryKey="true" nullable="false"/>
+        </column>
+           <!-- далее, создаем колонку "chat_id" что бы иметь связь с тем кто отправил сообщение через бот -->
+        <column name="chat_id" type="BIGINT">
+            <constraints nullable="false"/>
+        </column>
+        <column name="date_time" type="DATETIME(6)">
+            <constraints nullable="false"/>
+        </column>
+    </createTable>
+    <createIndex tableName="notification_task" indexName="IDX_NOTIFICATION_TASKS_DATE_TIME">
+        <column name = "date_time"/>
+    </createIndex>
+</changeSet>
+</databaseChangeLog>
+
