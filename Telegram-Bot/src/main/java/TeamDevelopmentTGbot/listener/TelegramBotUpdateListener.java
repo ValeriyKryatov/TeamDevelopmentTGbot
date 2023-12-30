@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @Service
@@ -38,6 +40,7 @@ public class TelegramBotUpdateListener implements UpdatesListener {
     public void init() {
         bot.setUpdatesListener(this);
     }
+    private final Map<Long, Boolean> userAlreadyInteracted = new HashMap<>(); // Карта для отслеживания взаимодействия с пользователями
 
     @Override
     public int process(List<Update> updates) {
@@ -45,42 +48,26 @@ public class TelegramBotUpdateListener implements UpdatesListener {
             var text = update.message().text();
             var chatId = update.message().chat().id();
 
-            if ("/start".equals(text)) {
-                bot.execute(new SendMessage(chatId, "Добро пожаловать в бот!"));
-            } else {
-                // 01-01-202220.00 Сделать домашнюю работу
-                var matcher = PATTERN.matcher(text);
-                if (matcher.matches()) {
-                    LocalDateTime dateTime = parseTime(matcher.group(1));
-                    if (dateTime == null) {
-                        bot.execute(new SendMessage(chatId, "Формат даты указан неверно!"));
-                        continue;
-                    }
-                    var taskText = matcher.group(3);
-                    NotificationTask task = new NotificationTask();
-                    task.setChatId(chatId);
-                    task.setText(taskText);
-                    task.setDateTime(dateTime);
-                    NotificationTask saved = repository.save(task);
-                    sendMessage(chatId, "Задача запланирована!");
-                    logger.info("Notification task saved: {}", saved);
+            if (userAlreadyInteracted.containsKey(chatId)) {
+                // Пользователь уже обращался
+                if (text.equalsIgnoreCase("/start")) {
+                    // Если пользователь выбирает меню
+                    sendMessage(chatId, "Выберите опцию из меню...");
+                } else {
+                    // Обрабатываем запросы пользователя
+                    sendMessage(chatId, "Вы выбрали: " + text);
                 }
+            } else {
+                // Пользователь обращается в первый раз
+                userAlreadyInteracted.put(chatId, true);
+                sendMessage(chatId, "Привет! Это ваше первое обращение. Напишите /menu для доступа к меню.");
             }
         }
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
-
-    // альтернативный пример
     private void sendMessage(long chatId, String text) {
         bot.execute(new SendMessage(chatId, text));
     }
 
-    private LocalDateTime parseTime(String text) {
-        try {
-            return LocalDateTime.parse(text, DATE_TIME_PATTERN);
-        } catch (DateTimeParseException e) {
-            logger.error("Cannot parse date and time: {}", text);
-        }
-        return null;
-    }
+
 }
