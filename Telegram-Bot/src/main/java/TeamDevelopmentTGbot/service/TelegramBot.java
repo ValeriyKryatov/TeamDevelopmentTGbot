@@ -28,12 +28,10 @@ public class TelegramBot extends TelegramLongPollingBot {
 //        кнопка меню в углу сообщений
         List<BotCommand> listofCommands = new ArrayList<>();
         listofCommands.add(new BotCommand("/start", "get a welcome message"));
-        listofCommands.add(new BotCommand("/m1", "...."));
-        listofCommands.add(new BotCommand("/m2", "...."));
-        listofCommands.add(new BotCommand("/m3", "...."));
-        listofCommands.add(new BotCommand("/m4", "...."));
-        listofCommands.add(new BotCommand("/m5", "...."));
-        try {
+        listofCommands.add(new BotCommand("/m1", "вызов клавиатуры в сообщении"));
+        listofCommands.add(new BotCommand("/m2", "вызов стационарной клавиатуры"));
+        listofCommands.add(new BotCommand("/m3", ".... в разработке "));
+         try {
             this.execute(new SetMyCommands(listofCommands,
                     new BotCommandScopeDefault(),
                     null));
@@ -64,6 +62,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()){
             messageText = update.getCallbackQuery().getData();
             System.out.println("  Этот текст, пришел от бота в CallbackQuery ==> " + messageText);
+            actionSelectorFromUpdate(messageText,update);
         }
     }
 
@@ -73,21 +72,28 @@ public class TelegramBot extends TelegramLongPollingBot {
         switch (text) {
             case "/start":
                 startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
-                break;
+                // обработчик при этом условии
+            break;
             case "/m1": {
+                // вызов клавиатуры привязанной к сообщению в чате
                 sendMessage(eInlineKeyboardAb(chatId));
+                // обработчик при этом условии
             }
             break;
             case "/m2": {
+                // вызов клавиатуры которая находится под чатом
                 sendMessage(eReplyKeyboardAb(chatId));
+                // обработчик при этом условии
             }
             break;
             default:
+                // вызов метода, всегда выполняется, данный default: можно удалить
                 sendMessage(chatId, "Sorry, command was not recognized");
+                // обработчик при этом условии
         }
     }
 
-    //   приветсвие при запуске бота
+    //   приветствие при запуске бота
     private void startCommandReceived(long chatId, String name) {
         String answer = "Hi, " + name + ", nice to meet you!";
         log.info("Replied to user " + name);
@@ -95,7 +101,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     }
 
-    //    вывод сообщения в телеграмм
+    //    вывод текстового сообщения в телеграмм
     private void sendMessage(long chatId, String textToSend) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
@@ -107,7 +113,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    //    вывод клавиатур в сообщениях телеграмм бота
+    //    вывод различных видов клавиатур в телеграмм бот
     private void sendMessage (SendMessage sendMessage){
         try {
             this.execute(sendMessage);
